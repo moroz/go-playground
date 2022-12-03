@@ -8,13 +8,25 @@ import (
 	"github.com/moroz/chi_demo/db"
 )
 
+func setUpServices() error {
+	_, err := db.ConnectToDb()
+	if err != nil {
+		return err
+	}
+
+	err = api.ListenAndServe()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func main() {
-	connStr := db.GetDBConnectionString()
-	_, err := db.ConnectToDb(connStr)
+	err := setUpServices()
+
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	err = api.ListenAndServe(":4000")
 	fmt.Println("Hello, world!")
 }

@@ -13,16 +13,17 @@ const DEFAULT_CONN_STRING = "postgres://postgres:postgres@localhost:5432/url_sho
 
 var DB *gorm.DB
 
-func GetDBConnectionString() string {
+func getDBConnectionString() string {
 	connStr := os.Getenv("DATABASE_URL")
 	if connStr == "" {
-		return DEFAULT_CONN_STRING
+		log.Fatalln("FATAL: Environment variable DATABASE_URL is not set!")
 	}
 	return connStr
 }
 
-func ConnectToDb(connStr string) (*gorm.DB, error) {
+func ConnectToDb() (*gorm.DB, error) {
 	log.Println("Connecting to PostgreSQL database...")
+	connStr := getDBConnectionString()
 	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{})
 	DB = db
 	return db, err
