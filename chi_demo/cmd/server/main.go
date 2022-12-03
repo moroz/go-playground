@@ -1,9 +1,10 @@
-package server
+package main
 
 import (
 	"fmt"
 	"log"
-	"moroz/chi_demo/db"
+
+	"github.com/moroz/chi_demo/db"
 )
 
 func main() {

@@ -1,4 +1,4 @@
-module moroz/chi_demo
+module github.com/moroz/chi_demo
 
 go 1.19
 
