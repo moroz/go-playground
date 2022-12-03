@@ -1,26 +1,34 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"strconv"
 )
 
+const keyServerAddr = "serverAddr"
+
 func getRoot(w http.ResponseWriter, r *http.Request) {
-	log.Printf("got / request\n")
+	ctx := r.Context()
+
+	log.Printf("%s: got / request\n", ctx.Value(keyServerAddr))
 	io.WriteString(w, "This is my website!\n")
 }
 
 func getHello(w http.ResponseWriter, r *http.Request) {
-	log.Printf("got /hello request\n")
+	ctx := r.Context()
+
+	log.Printf("%s: got /hello request\n", ctx.Value(keyServerAddr))
 	io.WriteString(w, "Hello, HTTP!\n")
 }
 
-const DEFAULT_PORT string = ":4000"
+const DEFAULT_PORT = ":4000"
 
 func getPort() string {
 	port := os.Getenv("PORT")
@@ -36,13 +44,44 @@ func main() {
 	mux.HandleFunc("/", getRoot)
 	mux.HandleFunc("/hello", getHello)
 
-	port := getPort()
-	log.Printf("Listening on port %s\n", port)
-	err := http.ListenAndServe(":3333", mux)
-	if errors.Is(err, http.ErrServerClosed) {
-		log.Printf("server closed\n")
-	} else if err != nil {
-		fmt.Printf("error starting server: %s\n", err)
-		os.Exit(1)
+	ctx, cancelCtx := context.WithCancel(context.Background())
+
+	baseContext := func(l net.Listener) context.Context {
+		ctx = context.WithValue(ctx, keyServerAddr, l.Addr().String())
+		return ctx
 	}
+
+	serverOne := &http.Server{
+		Addr:        getPort(),
+		Handler:     mux,
+		BaseContext: baseContext,
+	}
+
+	serverTwo := &http.Server{
+		Addr:        ":4444",
+		Handler:     mux,
+		BaseContext: baseContext,
+	}
+
+	go func() {
+		err := serverOne.ListenAndServe()
+		if errors.Is(err, http.ErrServerClosed) {
+			log.Printf("server closed\n")
+		} else if err != nil {
+			fmt.Printf("error listening for server one: %s\n", err)
+		}
+		cancelCtx()
+	}()
+
+	go func() {
+		err := serverTwo.ListenAndServe()
+		if errors.Is(err, http.ErrServerClosed) {
+			log.Printf("server closed\n")
+		} else if err != nil {
+			fmt.Printf("error listening for server one: %s\n", err)
+		}
+		cancelCtx()
+	}()
+
+	<-ctx.Done()
 }
