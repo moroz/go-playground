@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -33,12 +34,13 @@ func helloWorldHandler(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, `{"status":"success"}`)
 }
 
-func buildRouter() *mux.Router {
+func buildRouter() http.Handler {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/", helloWorldHandler)
 
-	return r
+	handler := handlers.LoggingHandler(os.Stdout, r)
+	return handler
 }
 
 func init() {
