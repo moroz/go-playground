@@ -11,6 +11,8 @@ import (
 
 const DEFAULT_CONN_STRING = "postgres://postgres:postgres@localhost:5432/url_shortener_dev?sslmode=disable"
 
+var DB *gorm.DB
+
 func GetDBConnectionString() string {
 	connStr := os.Getenv("DATABASE_URL")
 	if connStr == "" {
@@ -22,5 +24,6 @@ func GetDBConnectionString() string {
 func ConnectToDb(connStr string) (*gorm.DB, error) {
 	log.Println("Connecting to PostgreSQL database...")
 	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{})
+	DB = db
 	return db, err
 }

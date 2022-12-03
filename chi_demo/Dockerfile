@@ -10,7 +10,7 @@ COPY . .
 
 RUN go mod tidy
 
-RUN go build -o build/server cmd/server/main.go
+RUN go build -o build/server
 
 FROM alpine:$alpine_version AS cli
 
@@ -28,5 +28,8 @@ FROM alpine:$alpine_version AS runner
 WORKDIR /app
 
 COPY --from=builder /app/build/server ./server
+COPY --from=builder /app/scripts/ ./scripts/
 
 COPY --from=cli migrate ./migrate
+
+ENTRYPOINT ["./scripts/entrypoint.sh"]

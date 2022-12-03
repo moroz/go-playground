@@ -1,20 +1,30 @@
 package api
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/moroz/chi_demo/db"
 )
+
+func ListURLs(w http.ResponseWriter, r *http.Request) {
+	urls := db.ListURLs()
+	result, err := json.Marshal(urls)
+	if err != nil {
+		w.Write([]byte("error"))
+		return
+	}
+	w.Write(result)
+}
 
 func BuildHandler() http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("welcome"))
-	})
+	r.Get("/urls", ListURLs)
 
 	return r
 }

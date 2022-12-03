@@ -4,15 +4,17 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/moroz/chi_demo/api"
 	"github.com/moroz/chi_demo/db"
 )
 
 func main() {
 	connStr := db.GetDBConnectionString()
-	db, err := db.ConnectToDb(connStr)
-	_ = db
+	_, err := db.ConnectToDb(connStr)
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	err = api.ListenAndServe(":4000")
 	fmt.Println("Hello, world!")
 }
