@@ -1,11 +1,12 @@
 package db
 
 import (
-	"database/sql"
 	"log"
 	"os"
 
 	_ "github.com/lib/pq"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 const DEFAULT_CONN_STRING = "postgres://postgres:postgres@localhost:5432/url_shortener_dev?sslmode=disable"
@@ -18,8 +19,8 @@ func GetDBConnectionString() string {
 	return connStr
 }
 
-func ConnectToDb(connStr string) (*sql.DB, error) {
+func ConnectToDb(connStr string) (*gorm.DB, error) {
 	log.Println("Connecting to PostgreSQL database...")
-	db, err := sql.Open("postgres", connStr)
+	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{})
 	return db, err
 }
