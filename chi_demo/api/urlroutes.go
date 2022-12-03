@@ -54,11 +54,11 @@ func ShortenURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// &shortenURLSuccessResponse{
-	// 	Success: true,
-	// 	Data:    record,
-	// }
-	body, _ := json.Marshal(&record)
+	response := &shortenURLSuccessResponse{
+		Success: true,
+		Data:    record,
+	}
+	body, _ := json.Marshal(&response)
 	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("content-type", "application/json")
 	w.Write(body)
